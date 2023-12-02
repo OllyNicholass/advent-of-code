@@ -30,7 +30,7 @@ namespace AOC.Tests.Y2023
         {
             string[] lines = input != null ? new[] { input } : realData;
 
-            int result = GetPossibleGamesSum(lines, 12, 13, 14);
+            int result = ProcessGames(lines, false, 12, 13, 14);
 
             if (expected != null)
             {
@@ -40,7 +40,27 @@ namespace AOC.Tests.Y2023
             Console.WriteLine($"Part 1: {result}");
         }
 
-        private static int GetPossibleGamesSum(string[] input, int redCount, int greenCount, int blueCount)
+        [TestCase(@"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+                    Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+                    Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+                    Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+                    Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green", 2286)]
+        [TestCase(null, 72596)] // The actual answer
+        public void Part2(string input, int? expected)
+        {
+            string[] lines = input != null ? new[] { input } : realData;
+
+            int result = ProcessGames(lines, true, 12, 13, 14);
+
+            if (expected != null)
+            {
+                Assert.That(result, Is.EqualTo(expected.Value));
+            }
+
+            Console.WriteLine($"Part 2: {result}");
+        }
+
+        private static int ProcessGames(string[] input, bool isPart2, int redCount, int greenCount, int blueCount)
         {
             string[] games = string.Join("", input).Split(new[] { "Game " }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -86,10 +106,20 @@ namespace AOC.Tests.Y2023
                     return count >= cube.Count;
                 });
 
-                if (isPossible)
+                if (!isPart2 && isPossible)
                 {
                     sum += int.Parse(gameParts[0].Trim());
                 }
+
+                if (isPart2)
+                {
+                    int minRed = cubes.Where(cube => cube.Color == "red").Max(cube => cube.Count);
+                    int minGreen = cubes.Where(cube => cube.Color == "green").Max(cube => cube.Count);
+                    int minBlue = cubes.Where(cube => cube.Color == "blue").Max(cube => cube.Count);
+                    sum += minRed * minGreen * minBlue;
+                }
+
+                Console.WriteLine(cubes.Count);
             }
 
             return sum;
